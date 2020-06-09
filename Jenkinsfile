@@ -14,6 +14,7 @@ pipeline {
                 sh 'mvn -B -DskipTests clean package'
             }
         }
+
         stage('Running tests') {
             steps {
                 sh 'mvn test'
@@ -24,26 +25,11 @@ pipeline {
                 }
             }
         }
+
         stage('Deliver') { 
             steps {
-                sh '''
-                #!/usr/bin/env bash
-                set -x
-                mvn jar:jar install:install help:evaluate -Dexpression=project.name
-                set +x
-
-                set -x
-                NAME=`mvn help:evaluate -Dexpression=project.name | grep "^[^\[]"`
-                set +x
-
-                set -x
-                VERSION=`mvn help:evaluate -Dexpression=project.version | grep "^[^\[]"`
-                set +x
-
-                set -x
-                java -jar target/${NAME}-${VERSION}.jar
-
-                '''
+                sh "chmod +x -R ${env.WORKSPACE}"
+                sh 'bash ./jenkins/scripts/deliver.sh' 
             }
         }
     }
